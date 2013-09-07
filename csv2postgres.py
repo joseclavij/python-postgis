@@ -22,52 +22,6 @@ import csv
 import numpy
 import psycopg2
 
-def seleccionar_lineas(secuencia, prefijos=[['',0]], sufijos=[['',0]]):
-	'''
-	Selecciona lineas que contengan alguna combinacion de prefijo + sufijo en las posiciones correspondientes
-	'''
-	
-	
-	lista = list(secuencia)
-	lista.sort()
-	seleccionadas = []
-	for linea in lista:
-		for pf in prefijos:
-			pref = pf[0]
-			ini = pf[1]
-			fin = ini + len(pref)
-			
-			if linea[ini:fin] == pref and not linea in seleccionadas:
-				for sf in sufijos:
-					suf = sf[0]
-					if sf[1] == 0:
-						fin = len(linea)
-					else:
-						fin = sf[1]
-					ini = fin - len(suf)
-					
-					if linea[ini:fin] == suf and not linea in seleccionadas:
-						seleccionadas.append(linea)
-	return seleccionadas
-
-def listar_archivos(ruta):
-	'''
-	Listar recursivamente los archivos contenidos en ruta. Lista solo archivos (no directorios)
-	'''
-	import os
-		
-	lista_rutas = []
-	for carpeta in os.walk(ruta):
-		dire = carpeta[0]
-		archivos = carpeta[2]
-
-		for arch in archivos:
-			a = dire + '/' + arch
-			lista_rutas.append(a)
-	
-	lista_rutas.sort()
-	return lista_rutas
-
 
 def dir2postgres(ruta_directorio='', prefijos=[['',0]], sufijos=[['',0]], conn_args='', tabla='', string_campos=''):
 	
@@ -186,6 +140,7 @@ def csv2postgres(ruta_archivo, conn_args, tabla, string_campos='', header=0, sep
 	array2postgres(datos_2D=lectura, conn_args=conn_args, tabla=tabla, string_campos=string_campos)
 	f.close()
 
+
 def array2postgres(datos_2D, conn_args='', tabla='', string_campos=''):
 	'''
 
@@ -220,7 +175,57 @@ def array2postgres(datos_2D, conn_args='', tabla='', string_campos=''):
 	insert_many = datos_2D.tolist()
 	print 'Insertando el contenido en', conn_args, 'TABLA:',tabla
 	cur1.executemany("INSERT INTO " + tabla + " " + string_campos + " VALUES (" + sf + ")", insert_many)	
+	
 	conn.commit()
+
+
+def seleccionar_lineas(secuencia, prefijos=[['',0]], sufijos=[['',0]]):
+	'''
+	Selecciona lineas que contengan alguna combinacion de prefijo + sufijo en las posiciones correspondientes
+	'''
+	
+	
+	lista = list(secuencia)
+	lista.sort()
+	seleccionadas = []
+	for linea in lista:
+		for pf in prefijos:
+			pref = pf[0]
+			ini = pf[1]
+			fin = ini + len(pref)
+			
+			if linea[ini:fin] == pref and not linea in seleccionadas:
+				for sf in sufijos:
+					suf = sf[0]
+					if sf[1] == 0:
+						fin = len(linea)
+					else:
+						fin = sf[1]
+					ini = fin - len(suf)
+					
+					if linea[ini:fin] == suf and not linea in seleccionadas:
+						seleccionadas.append(linea)
+	return seleccionadas
+
+
+def listar_archivos(ruta):
+	'''
+	Listar recursivamente los archivos contenidos en ruta. Lista solo archivos (no directorios)
+	'''
+	import os
+		
+	lista_rutas = []
+	for carpeta in os.walk(ruta):
+		dire = carpeta[0]
+		archivos = carpeta[2]
+
+		for arch in archivos:
+			a = dire + '/' + arch
+			lista_rutas.append(a)
+	
+	lista_rutas.sort()
+	return lista_rutas
+
 
 ########################################################################
 ########################################################################
